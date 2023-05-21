@@ -8,7 +8,8 @@ require('./db');
 // Handles http requests (express is node js framework)
 // https://www.npmjs.com/package/express
 const express = require('express');
-
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
 // Handles the handlebars
 // https://www.npmjs.com/package/hbs
 const hbs = require('hbs');
@@ -25,8 +26,17 @@ const capitalized = string => string[0].toUpperCase() + string.slice(1).toLowerC
 app.locals.title = `${capitalized(projectName)}- Generated with Ironlauncher`;
 
 // 👇 Start handling routes here
-const index = require('./routes/index');
-app.use('/', index);
+const userRoutes = require('./routes/user.routes');
+app.use('/users', userRoutes);
+
+app.use(
+    session({
+      secret: 'your-secret-key',
+      resave: false,
+      saveUninitialized: false,
+      store: MongoStore.create({ mongoUrl: 'mongodb://0.0.0.0:27017/recipe-app' }),
+    })
+  );
 
 // ❗ To handle errors. Routes that don't exist or errors that you handle in specific routes
 require('./error-handling')(app);
